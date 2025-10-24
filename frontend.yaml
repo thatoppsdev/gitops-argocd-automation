@@ -1,60 +1,33 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: frontend-bluegreen
+  name: frontend
 spec:
-  replicas: 3
-  revisionHistoryLimit: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: frontend-bluegreen
+      app: frontend
   template:
     metadata:
       labels:
-        app: frontend-bluegreen
+        app: frontend
     spec:
       containers:
       - name: frontend
-        image: thatoppsdev/quotes-frontend:latest  # Start with purple
+        image: thatoppsdev/quotes-frontend:latest
         ports:
-        - name: http
-          containerPort: 80
-          protocol: TCP
-        resources:
-          requests:
-            memory: 32Mi
-            cpu: 5m
-  strategy:
-    blueGreen:
-      activeService: frontend-bluegreen-active
-      previewService: frontend-bluegreen-preview
-      autoPromotionEnabled: false
-      scaleDownDelaySeconds: 30
+        - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-bluegreen-active
+  name: frontend
 spec:
   selector:
-    app: frontend-bluegreen
+    app: frontend
   type: NodePort
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-    nodePort: 30082
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend-bluegreen-preview
-spec:
-  selector:
-    app: frontend-bluegreen
-  type: NodePort
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-    nodePort: 30083
+    nodePort: 30080
